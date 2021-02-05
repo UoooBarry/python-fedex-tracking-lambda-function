@@ -3,25 +3,58 @@ import json
 import xmltodict
 import requests
 
+CREDIENTIALS = [
+    'KEY',
+    'PASSWORD',
+    'ACCOUNT_NUMBER',
+    'METER_NUMBER'
+]
+
+SANDBOX_CREDIENTIALS = [
+    'SANDBOX_KEY',
+    'SANDBOX_PASSWORD',
+    'SANDBOX_ACCOUNT_NUMBER',
+    'SANDBOX_METER_NUMBER'
+]
+
 
 def track(event, *_):
     data = json.loads(event['body'])
+    errors = process_keys(data['sandbox'])
     request = Request(data['track_no'], data['sandbox'], data['lang'])
     response = request.send()
     content = xmltodict.parse(response.content)
     body = content['SOAP-ENV:Envelope']['SOAP-ENV:Body']
+
+    processed_body = {
+        'success': response.status_code == 200,
+        'sandbox': data['sandbox'],
+        'data': body
+    }
+    if not errors:
+        processed_return = json.dumps(processed_body)
+    else:
+        processed_return = errors
+
     return {
         'isBase64Encoded': False,
-        'statusCode': response.status_code,
+        'statusCode': 200 if not errors else 400,
         'headers': {
             'Content-Type': 'application/json',
         },
-        'body': json.dumps({
-            'success': response.status_code == 200,
-            'sandbox': data['sandbox'],
-            'data': body
-        })
+        'body': processed_return
     }
+
+
+def process_keys(sandbox):
+    errors = []
+    if not sandbox:
+        map(lambda env: errors.insert('%s KEY IS MISSING' %
+                                      env) if os.environ[env] else False, CREDIENTIALS)
+    else:
+        map(lambda env: errors.insert('%s KEY IS MISSING' % env)
+            if os.environ[env] else False, SANDBOX_CREDIENTIALS)
+    return errors
 
 
 class Request:
@@ -29,7 +62,7 @@ class Request:
         self.track_no = track_no
         self.lang = lang
         self.sandbox = sandbox
-        self.request_url = 'https://wsbeta.fedex.com:443/web-services/track' if self.sandbox else 'https://ws.fedex.com:443/web-services/track' # pylint: disable=line-too-long
+        self.request_url = 'https://wsbeta.fedex.com:443/web-services/track' if self.sandbox else 'https://ws.fedex.com:443/web-services/track'  # pylint: disable=line-too-long
 
     def send(self):
         response = requests.post(
@@ -47,8 +80,10 @@ class Request:
     def get_request_body(self):
         key = os.environ['KEY'] if not self.sandbox else os.environ['SANDBOX_KEY']
         password = os.environ['PASSWORD'] if not self.sandbox else os.environ['SANDBOX_PASSWORD']
-        account_number = os.environ['ACCOUNT_NUMBER'] if not self.sandbox else os.environ['SANDBOX_ACCOUNT_NUMBER'] # pylint: disable=line-too-long
-        meter_number = os.environ['METER_NUMBER'] if not self.sandbox else os.environ['SANDBOX_METER_NUMBER'] # pylint: disable=line-too-long
+        account_number = os.environ['ACCOUNT_NUMBER'] if not self.sandbox else os.environ[
+            'SANDBOX_ACCOUNT_NUMBER']
+        meter_number = os.environ['METER_NUMBER'] if not self.sandbox else os.environ[
+            'SANDBOX_METER_NUMBER']
         language = self.get_language_code()
         language_code = language['language_code']
         locale_code = language['locale_code']
