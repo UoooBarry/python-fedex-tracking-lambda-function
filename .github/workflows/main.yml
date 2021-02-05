@@ -37,6 +37,7 @@ jobs:
           make pack
       - name: Create Release
         id: create_release
+        tag_name: auto-release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
@@ -48,7 +49,6 @@ jobs:
           prerelease: false
       - name: Upload Release Asset
         id: upload-release-asset 
-        tag_name: auto-release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
