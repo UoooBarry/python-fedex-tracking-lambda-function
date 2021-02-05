@@ -21,7 +21,13 @@ You need the following environment variables: <br>
 `ACCOUNT_NUMBER
 KEY
 PASSWORD
-METER_NUMBER`
+METER_NUMBER
+`<br/>
+`SANDBOX_ACCOUNT_NUMBER
+SANDBOX_KEY
+SANDBOX_PASSWORD
+SANDBOX_METER_NUMBER
+`
 
 # Call the function
 Request body: <br>
