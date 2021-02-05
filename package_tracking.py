@@ -1,17 +1,26 @@
 import os
+import json
 import xmltodict
 import requests
 
 
 def track(event, *_):
-    request = Request(event['track_no'], event['sandbox'], event['lang'])
+    data = json.loads(event['body'])
+    request = Request(data['track_no'], data['sandbox'], data['lang'])
     response = request.send()
     content = xmltodict.parse(response.content)
     body = content['SOAP-ENV:Envelope']['SOAP-ENV:Body']
     return {
-        'success': response.status_code == 200,
-        'sandbox': event['sandbox'],
-        'data': body
+        'isBase64Encoded': False,
+        'statusCode': response.status_code,
+        'headers': {
+            'Content-Type': 'application/json',
+        },
+        'body': json.dumps({
+          'success': response.status_code == 200,
+          'sandbox': data['sandbox'],
+          'data': body
+        })
     }
 
 
