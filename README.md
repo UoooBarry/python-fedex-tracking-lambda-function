@@ -2,10 +2,12 @@
 A simple python lambda function that could track a FedEx package with a tracking number
 
 # Deploy
+## Configuration
 Configure your AWS credentials by following this tutorial: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html <br>
 To create your own lambda function, go to https://aws.amazon.com/lambda/, sign in and create a lambda call `package_tracking` (You can modify it in the Makefile)<br>
-Full guide of python lambda function: https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html<br>
-A makfile script is made for convenience of the deployment, Steps:<br>
+Full guide of python lambda function: https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html
+## Deploy
+A makfile script is made for convenience of the deployment, follow steps:<br>
 Install and pack the dependencies to a zip: <br>
 `make pack` <br>
 Deploy to your aws lambda function: <br>
