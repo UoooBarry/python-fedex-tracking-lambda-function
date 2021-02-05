@@ -1,5 +1,6 @@
 # FedEx package tracking AWS lambda function
-A simple python lambda function that could track a FedEx package with a tracking number
+A simple python lambda function that could track a FedEx package with a tracking number.<br/>
+Contributor: UoooBarry
 
 # Deploy
 ## Configuration
