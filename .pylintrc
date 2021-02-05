@@ -1,0 +1,3 @@
+[master]
+  disable=
+      missing-function-docstring, missing-class-docstring, reportMissingImports, import-error, missing-module-docstring

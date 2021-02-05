@@ -1,47 +1,53 @@
 import os
-import xmltodict, requests
+import xmltodict
+import requests
 
-def track(event, context):
-  request = Request(event['track_no'], event['sandbox'], event['lang'])
-  response = request.send()
-  content = xmltodict.parse(response.content)
-  body = content['SOAP-ENV:Envelope']['SOAP-ENV:Body']
-  return {
-    'success': response.status_code == 200,
-    'sandbox': event['sandbox'],
-    'data': body
-  }
 
-class Request:
-  def __init__(self, track_no, sandbox, lang):
-    self.track_no = track_no
-    self.lang = lang
-    self.sandbox = sandbox
-
-  def send(self):
-    response = requests.post(self.get_request_url(), data=self.get_request_body())
-    if response.status_code != 200:
-      raise ServiceError
-    return response
-  
-  def get_language_code(self):
+def track(event, *_):
+    request = Request(event['track_no'], event['sandbox'], event['lang'])
+    response = request.send()
+    content = xmltodict.parse(response.content)
+    body = content['SOAP-ENV:Envelope']['SOAP-ENV:Body']
     return {
-      'language_code': 'FR' if self.lang.lower() == 'fr' else 'EN',
-      'locale_code': 'CA' if self.lang.lower() == 'fr' else 'US'
+        'success': response.status_code == 200,
+        'sandbox': event['sandbox'],
+        'data': body
     }
 
-  def get_request_url(self):
-    return 'https://wsbeta.fedex.com:443/web-services/track' if self.sandbox else 'https://ws.fedex.com:443/web-services/track'
 
-  def get_request_body(self):
-    key = os.environ['KEY']
-    password = os.environ['PASSWORD']
-    account_number = os.environ['ACCOUNT_NUMBER']
-    meter_number = os.environ['METER_NUMBER']
-    language = self.get_language_code()
-    language_code = language['language_code']
-    locale_code = language['locale_code']
-    return f'''
+class Request:
+    def __init__(self, track_no, sandbox, lang):
+        self.track_no = track_no
+        self.lang = lang
+        self.sandbox = sandbox
+
+    def send(self):
+        response = requests.post(
+            self.get_request_url(), data=self.get_request_body())
+        if response.status_code != 200:
+            raise 'ServiceError'
+        return response
+
+    def get_language_code(self):
+        return {
+            'language_code': 'FR' if self.lang.lower() == 'fr' else 'EN',
+            'locale_code': 'CA' if self.lang.lower() == 'fr' else 'US'
+        }
+
+    def get_request_url(self):
+        if self.sandbox:
+            return 'https://wsbeta.fedex.com:443/web-services/track'
+        return 'https://ws.fedex.com:443/web-services/track'
+
+    def get_request_body(self):
+        key = os.environ['KEY']
+        password = os.environ['PASSWORD']
+        account_number = os.environ['ACCOUNT_NUMBER']
+        meter_number = os.environ['METER_NUMBER']
+        language = self.get_language_code()
+        language_code = language['language_code']
+        locale_code = language['locale_code']
+        return f'''
       <soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'
                 xmlns:v16='http://fedex.com/ws/track/v16'>
                     <soapenv:Header/>
