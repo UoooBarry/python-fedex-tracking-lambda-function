@@ -1,3 +1,4 @@
 packages/**
 pack.zip
 .DS_Store
+.vscode/**
