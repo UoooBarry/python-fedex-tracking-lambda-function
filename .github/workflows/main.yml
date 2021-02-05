@@ -28,8 +28,10 @@ jobs:
         with:
           python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
           architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
-      - name: lint source
-        uses: whynothugo/python-linting@master
+      - name: Python linter
+        run: |
+          python3 -m pip install pylint
+          python3 -m pylint package_tracking.py
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
           make pack
