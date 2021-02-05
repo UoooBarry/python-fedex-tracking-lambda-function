@@ -66,7 +66,7 @@ class Request:
 
     def send(self):
         response = requests.post(
-            self.get_request_url(), data=self.get_request_body())
+            self.request_url, data=self.get_request_body())
         if response.status_code != 200:
             raise 'ServiceError'
         return response
@@ -76,11 +76,6 @@ class Request:
             'language_code': 'FR' if self.lang.lower() == 'fr' else 'EN',
             'locale_code': 'CA' if self.lang.lower() == 'fr' else 'US'
         }
-
-    def get_request_url(self):
-        if self.sandbox:
-            return 'https://wsbeta.fedex.com:443/web-services/track'
-        return 'https://ws.fedex.com:443/web-services/track'
 
     def get_request_body(self):
         key = os.environ['KEY'] if not self.sandbox else os.environ['SANDBOX_KEY']
