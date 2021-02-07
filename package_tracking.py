@@ -58,9 +58,9 @@ def process_keys(data):
             if os.environ[env] else False, SANDBOX_CREDIENTIALS)
     return {
       'track_no': data['track_no'],
-      'sandbox': data['sandbox'] or False,
-      'lang': data['lang'] or 'en',
-      errors: errors
+      'sandbox': data.get('sandbox', False),
+      'lang': data.get('lang', 'en'),
+      'errors': errors
     }
 
 
