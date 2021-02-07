@@ -24,14 +24,14 @@ def track(event, *_):
 
     errors = process_data['errors']
     if errors:
-        return response_format(400, json.dumps({'errors': errors}))
+        return response_format(400, {'errors': errors})
 
     request = Request(process_data['track_no'],
                       process_data['sandbox'], process_data['lang'])
     response = request.send()
     content = xmltodict.parse(response.content)
     body = content['SOAP-ENV:Envelope']['SOAP-ENV:Body']
-    return response_format(200, json.dumps(body))
+    return response_format(200, body)
 
 
 def process_keys(data):
@@ -59,7 +59,7 @@ def response_format(code, body):
         'headers': {
             'Content-Type': 'application/json',
         },
-        'body': body
+        'body': json.dumps(body)
     }
 
 
