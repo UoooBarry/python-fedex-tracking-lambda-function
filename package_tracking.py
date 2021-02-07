@@ -17,11 +17,11 @@ SANDBOX_CREDIENTIALS = [
     'SANDBOX_METER_NUMBER'
 ]
 
-
 def track(event, *_):
     data = json.loads(event['body'])
-    errors = process_keys(data['sandbox'])
-    request = Request(data['track_no'], data['sandbox'], data['lang'])
+    process_data = process_keys(data)
+    errors = process_data['errors']
+    request = Request(process_data['track_no'], process_data['sandbox'], process_data['lang'])
     response = request.send()
     content = xmltodict.parse(response.content)
     body = content['SOAP-ENV:Envelope']['SOAP-ENV:Body']
@@ -46,15 +46,22 @@ def track(event, *_):
     }
 
 
-def process_keys(sandbox):
+def process_keys(data):
     errors = []
-    if not sandbox:
+    if not 'track_no' in data:
+        errors.insert('Missing tracking number')
+    if not data['sandbox']:
         map(lambda env: errors.insert('%s KEY IS MISSING' %
                                       env) if os.environ[env] else False, CREDIENTIALS)
     else:
         map(lambda env: errors.insert('%s KEY IS MISSING' % env)
             if os.environ[env] else False, SANDBOX_CREDIENTIALS)
-    return errors
+    return {
+      'track_no': data['track_no'],
+      'sandbox': data['sandbox'] or False,
+      'lang': data['lang'] or 'en',
+      errors: errors
+    }
 
 
 class Request:
