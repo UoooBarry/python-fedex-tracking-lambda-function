@@ -24,7 +24,7 @@ def track(event, *_):
 
     errors = process_data['errors']
     if errors:
-        return response_format(400, json.dumps({'erros': errors}))
+        return response_format(400, json.dumps({'errors': errors}))
 
     request = Request(process_data['track_no'],
                       process_data['sandbox'], process_data['lang'])
