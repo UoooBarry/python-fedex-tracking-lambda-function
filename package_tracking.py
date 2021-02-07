@@ -17,33 +17,21 @@ SANDBOX_CREDIENTIALS = [
     'SANDBOX_METER_NUMBER'
 ]
 
+
 def track(event, *_):
     data = json.loads(event['body'])
     process_data = process_keys(data)
+
     errors = process_data['errors']
-    request = Request(process_data['track_no'], process_data['sandbox'], process_data['lang'])
+    if errors:
+        return response_format(400, errors)
+
+    request = Request(process_data['track_no'],
+                      process_data['sandbox'], process_data['lang'])
     response = request.send()
     content = xmltodict.parse(response.content)
     body = content['SOAP-ENV:Envelope']['SOAP-ENV:Body']
-
-    processed_body = {
-        'success': response.status_code == 200,
-        'sandbox': data['sandbox'],
-        'data': body
-    }
-    if not errors:
-        processed_return = json.dumps(processed_body)
-    else:
-        processed_return = errors
-
-    return {
-        'isBase64Encoded': False,
-        'statusCode': 200 if not errors else 400,
-        'headers': {
-            'Content-Type': 'application/json',
-        },
-        'body': processed_return
-    }
+    return response_format(200, body)
 
 
 def process_keys(data):
@@ -57,10 +45,21 @@ def process_keys(data):
         map(lambda env: errors.insert('%s KEY IS MISSING' % env)
             if os.environ[env] else False, SANDBOX_CREDIENTIALS)
     return {
-      'track_no': data['track_no'],
-      'sandbox': data.get('sandbox', False),
-      'lang': data.get('lang', 'en'),
-      'errors': errors
+        'track_no': data['track_no'],
+        'sandbox': data.get('sandbox', False),
+        'lang': data.get('lang', 'en'),
+        'errors': errors
+    }
+
+
+def response_format(code, body):
+    return {
+        'isBase64Encoded': False,
+        'statusCode': code,
+        'headers': {
+            'Content-Type': 'application/json',
+        },
+        'body': body
     }
 
 
