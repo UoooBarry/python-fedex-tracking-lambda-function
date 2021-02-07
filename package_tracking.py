@@ -37,12 +37,12 @@ def track(event, *_):
 def process_keys(data):
     errors = []
     if not 'track_no' in data:
-        errors.insert('Missing tracking number')
+        errors.append('Missing tracking number')
     if not data['sandbox']:
-        map(lambda env: errors.insert('%s KEY IS MISSING' %
+        map(lambda env: errors.append('%s KEY IS MISSING' %
                                       env) if os.environ[env] else False, CREDIENTIALS)
     else:
-        map(lambda env: errors.insert('%s KEY IS MISSING' % env)
+        map(lambda env: errors.append('%s KEY IS MISSING' % env)
             if os.environ[env] else False, SANDBOX_CREDIENTIALS)
     return {
         'track_no': data['track_no'],
